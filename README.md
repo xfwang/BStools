@@ -27,7 +27,8 @@ Main output:
 3. DMR identification: we provide a example script using Bioconductor package BiSeq to detect DMRs between tumor and normal samples. Please refer to 'biseq.example.script.R' for more detail
 
 4. DMR visualization: we provide a R fucntions and script for DMR visualization. An example plot is shown in DMR.example.jpeg
-5. 
+
 
 
 **Publication**
+**Wang X, et al. A trimming-and-retrieving alignment scheme for bisulfite sequencing data. Bioinformatics (2015) doi:10.1093/bioinformatics/btv089. *(Corresponding author)**
