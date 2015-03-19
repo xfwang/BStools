@@ -27,3 +27,7 @@ Main output:
 3. DMR identification: we provide a example script using Bioconductor package BiSeq to detect DMRs between tumor and normal samples. Please refer to 'biseq.example.script.R' for more detail
 
 4. DMR visualization: we provide a R fucntions and script for DMR visualization. An example plot is shown in DMR.example.jpeg
+5. 
+
+
+**Publication**
