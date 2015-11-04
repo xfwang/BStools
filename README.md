@@ -4,7 +4,7 @@ README.txt for BStools
 1. Installation: All needed software are compliled in resource folder. The toolkit is ready to use once unzipped.
                  If users prefer to use the software (FastQc, brat, fastx, cutadapt) by themself, the path for these software can be specified in main function: RRBS.pl
 
-2. RRBS.pl: the main function from data quality control to methylation level calling
+2. BStools.pl: the main function from data quality control to methylation level calling
 
 Example command line:
 
