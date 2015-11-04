@@ -38,4 +38,4 @@ Main output:
 
 **Citation:**
 
-Wang X, et al. A trimming-and-retrieving alignment scheme for bisulfite sequencing data. Bioinformatics (2015) doi:10.1093/bioinformatics/btv089. 
+Wang X, et al. A trimming-and-retrieving alignment scheme for bisulfite sequencing data. Bioinformatics (2015) 31(12):2040-2.
