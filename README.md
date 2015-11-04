@@ -31,7 +31,7 @@ Main output:
 
 4. DMR visualization: we provide a R fucntions and script for DMR visualization. An example plot is shown in DMR.example.jpeg
 
-
+5. We provide an example dataset (Examples/example.fastq)and unix shell scripts (example.code.txt) for applying BStools to the example dataset.
 
 
 
