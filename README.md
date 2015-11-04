@@ -8,7 +8,7 @@ README.txt for BStools
 
 Example command line:
 
-perl RRBS.pl  -i SAMPLE.fastq -t F -d ~/RRBS_toolKit  -p SAMPLE -R ~/reference/hg19/all  -r chr.list.name.txt -H 2 -Q ~/bin/FastQC/./fastqc -M ~/bin/brat-1.2.4/./trim -K ~/bin/brat-1.2.4/./brat-large -J ~/bin/brat-1.2.4/./acgt-count -T fix -N 5 -n 0 
+perl BStools.pl  -i example.fastq -t F -d ~/BStools/ -p SAMPLE -R ~/hg19/  -r chr.list.name.txt -H 2 -Q ~/bin/FastQC/./fastqc -M ~/bin/brat-1.2.4/./trim -K ~/bin/brat-1.2.4/./brat-large -J ~/bin/brat-1.2.4/./acgt-count -T retrieve -N 5 -n 0 
 
 Note:
 1) please refer to methyQA for detailed description on input preparations and paramter settings
