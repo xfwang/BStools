@@ -1,0 +1,25 @@
+Copy executables into this directory.
+
+
+Unarchive test_data.tgz:
+
+tar xvzf test_data.tgz
+
+
+To map pairs, run:
+
+time ./brat -r references.txt -1 test_reads1.txt -2 test_reads2.txt -o output.txt -bs -pe -i 200 -a 300 
+
+where "references.txt" file contains the names of FASTA files with references; RAW reads are given in two files: test_reads1.txt and test_reads2.txt; output results will be in "output.txt" file; "bs" and "pe" options are for specifying the type of mapping: bisulfite and paired-end respectively; the range of the insert size between two mates is given by the options "i" and "a" (insert size is the distance between the leftmost endpoints of the mapped mates on forward strand).
+
+
+To map single reads with 5' mates, run:
+
+time ./brat -r references.txt -s test_reads1.txt -o output_singles1.txt -bs 
+
+
+To map single reads with 3' mates, run:
+
+time ./brat -r references.txt -s test_reads2.txt -o output_singles2.txt -bs -A   
+
+Similar commands are used with brat-large (just replace "brat" with "brat-large" in the commands above).

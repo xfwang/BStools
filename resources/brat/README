@@ -1,0 +1,38 @@
+BRAT is whole genome bisulfite sequence mapping program
+
+Website:
+  http://compbio.cs.ucr.edu/zero
+
+Requirements:
+  1. A 64-bit processor, Unix/Linux operating system
+  2. A C++ compiler which you can find packaged as
+       * gcc-c++  in RPM based variants (CentOS and others)
+       * g++      in APT based (Debian, Ubuntu and others)
+
+To compile run:
+  make
+ 
+This will create 5 executable programs: 
+  brat
+  brat-large
+  acgt-count
+  trim
+  brat-large-build
+
+Documentation can be found in the file:
+  BRAT_USER_MANUAL.pdf
+
+
+BRAT is Free / Open Source Software:
+  General Public License, Version 3
+  can be found in the file LICENCE or
+  http://www.gnu.org/licenses/gpl-3.0.txt
+
+
+Please send questions or comments to:
+
+    Elena Harris <elenah@cs.ucr.edu>
+
+  If you encountered problems compiling or running BRAT,
+  please email us the command you were trying to run and
+  all the output/error messages.

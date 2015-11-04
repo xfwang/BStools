@@ -1,0 +1,18 @@
+# example codes using exmple.fastq
+# assuming the BStools package is installed at /home/BStools/
+# We provide example codes for three stratergies: raw, trim, and retrieve. 
+# The main parameter to control these straterges is '-T'
+
+# 1. raw data
+# no trimming (-T no); allow at most 2 mismatches in brat aligment; prefix of output is "example"; log is saved to BStools.log
+perl /home/BStools/code/BStools.pl  -i example.fastq -t F -d /home/BStools/   -p example -R /pathway/to/reference/genome  -r /pathway/to/chr/list/name/file  -Q /home/BStools/resources/FastQC/fastqc -M /home/BStools/resources/brat/trim -K //home/BStools/resources/brat/brat-large -J /home/BStools/resources/brat/acgt-count -T no  -H 2  > BStools.log
+
+# trim off 5 based at 5' end
+# trim (-T fix -N 5 -n 0); allow at most 2 mismatches in brat aligment; prefix of output is "example"; log is saved to BStools.log
+perl /home/BStools/code/BStools.pl  -i example.fastq -t F -d /home/BStools/   -p example -R /pathway/to/reference/genome  -r /pathway/to/chr/list/name/file  -Q /home/BStools/resources/FastQC/fastqc -M /home/BStools/resources/brat/trim -K //home/BStools/resources/brat/brat-large -J /home/BStools/resources/brat/acgt-count -T fix -N 5 -n 0  -H 2  > BStools.log
+
+
+
+# 3 retrieve
+perl /home/BStools/code/BStools.pl  -i example.fastq -t F -d /home/BStools/   -p example -R /pathway/to/reference/genome  -r /pathway/to/chr/list/name/file  -Q /home/BStools/resources/FastQC/fastqc -M /home/BStools/resources/brat/trim -K //home/BStools/resources/brat/brat-large -J /home/BStools/resources/brat/acgt-count -T retrieve -N 5 -n 0  -H 2  > methyQA.log
+

@@ -1,0 +1,222 @@
+# example R script fpr performing DMR analysis using BiSeq R packages
+
+# 1) This example code use 3 tumor samples and 3 normal samples. Users can choose different number of samples (>=3)
+# 2) We recommand analyzing chromosomes seperately. Users can choose different chorosome by changing 'i' 
+# 3) We use small smothing window in this example script. Users can choose different setting by changing parameter h in predictMeth()
+# 4) Generate heatmap for DMRs (>=2 sites) with mean difference >=0.3 between groups
+# 5) Three output: 
+#      (1) .mC.txt: raw methylation levels of all samples
+#      (2) .DMRs.txt: identified DMRs
+#      (3) .smooth.mC.txt: smoothed mC level by BiSeq
+#   These files are later needed for DMR visualization
+
+source("http://bioconductor.org/biocLite.R")
+biocLite("BiSeq")
+library(BiSeq)
+
+tumor_sample<-c("T1", "T2", "T3")
+normal_sample<-c("N1", "N2", "N3")
+
+tumor_sample_path<-sapply(1:length(tumor_sample), function(x) return(paste( tumor_sample[x], "/",  unlist(strsplit(tumor_sample[x], "/"))[2], ".CG.base", sep="")))
+normal_sample_path<-sapply(1:length(normal_sample), function(x) return(paste( normal_sample[x], "/",  unlist(strsplit(normal_sample[x], "/"))[2], ".CG.base", sep="")))
+
+chr.list<-paste("chr", c(1:22,"X","Y"), sep="")
+
+i=6 # analyzing chromosome 6
+
+tumor_sample_chr<-paste( tumor_sample, "/CG.", chr.list[i], sep="")
+normal_sample_chr<-paste( normal_sample, "/CG.", chr.list[i],  sep="")
+
+# get the mC level for target region in each sample
+for (j in 1:length(tumor_sample)){
+                 cat ("i is ", j, "\n")
+		         if(!file.exists(tumor_sample_chr[j])){
+                     system(paste("  awk  \'$1 ~ /^", chr.list[i], "$/{print}\' ",tumor_sample_path[j]," > ", tumor_sample_chr[j],sep=''))
+		         }
+		         if(!file.exists(normal_sample_chr[j])){
+                     system(paste("  awk  \'$1 ~ /^", chr.list[i], "$/{print}\' ",normal_sample_path[j]," > ", normal_sample_chr[j],sep=''))
+		         }
+
+                 tumor<-read.table(tumor_sample_chr[j])
+                 normal<-read.table(normal_sample_chr[j])
+
+
+                 tumor_cov<-as.integer(tumor[,3])
+                 normal_cov<-as.integer(normal[,3])
+
+                 tumor_mC<-tumor[,4]
+                 tumor_na.index<-(1:length(tumor_cov))[tumor_cov==0]
+                 tumor_mC[tumor_na.index]<-NA
+
+                 normal_mC<-normal[,4]
+                 normal_na.index<-(1:length(normal_cov))[normal_cov==0]
+                 normal_mC[normal_na.index]<-NA
+
+                 tumor_M<-as.integer(round(tumor[,3]*tumor[,4]))
+                 normal_M<-as.integer(round(normal[,3]*normal[,4]))
+
+                 pos<-tumor[,2]
+
+                  if (j==1){
+                      cov_mat<-cbind(tumor_cov, normal_cov)
+                      M_mat<-cbind(tumor_M, normal_M)
+                      mC_mat<-cbind(tumor_mC, normal_mC)
+                  }
+                  else {
+                      cov_mat<-cbind(cov_mat, tumor_cov, normal_cov)
+                      M_mat<-cbind(M_mat, tumor_M, normal_M)
+                      mC_mat<-cbind(mC_mat, tumor_mC, normal_mC)
+                  }
+	}
+
+   cov_mat<-cov_mat[,c(1,3,5, 2,4,6)]
+   M_mat<-M_mat[,c(1,3,5, 2,4,6)]
+   mC_mat<-mC_mat[,c(1,3,5, 2,4,6)]
+   mC_mat_pos<-cbind(pos, mC_mat)
+
+
+
+   exptData <- SimpleList(Sequencer = "XX", Year = "2014")
+   rowData <- GRanges(seqnames = chr.list[i], strand=rep("+", dim(cov_mat)[1] ),
+                  ranges = IRanges(start = pos, end = pos ))
+   colData <- DataFrame(group = as.factor(rep(c("Tumor", "Normal"), times = c(3,3))),
+                     row.names = c("T1", "T2", "T3", "N1","N2", "N3"))
+   totalReads <-cov_mat
+   methReads <- M_mat
+   chr_BS<-BSraw(exptData = exptData,
+      rowData = rowData,
+      colData = colData,
+      totalReads = totalReads,
+      methReads = methReads)
+
+
+chr_BS.clust.unlim <- clusterSites(object = chr_BS,
+                                 groups = colData(chr_BS)$group,
+                                 perc.samples = 2/3,
+                                 min.sites = 20,
+                                 max.dist = 100)
+
+
+head(rowData(chr_BS.clust.unlim ))
+
+ind.cov <- totalReads(chr_BS.clust.unlim) > 0
+quant <- quantile(totalReads(chr_BS.clust.unlim)[ind.cov], 0.95)
+quant
+chr_BS.clust.lim <- limitCov(chr_BS.clust.unlim, maxCov = quant)  # 9999 clusters left
+
+
+postscript(paste(chr.list[i], ".BS.AA.lusterCovBoxPlot.ps", sep=""), paper="letter", horizontal=T)
+par(mfrow=c(1,1))
+covBoxplots(chr_BS.clust.lim, col = "cornflowerblue", las = 2)
+dev.off()
+
+predictedMeth <- predictMeth(object = chr_BS.clust.lim, h=20, mc.cores=6)
+
+tumor <- predictedMeth[, colData(predictedMeth)$group == "Tumor"]
+normal <- predictedMeth[, colData(predictedMeth)$group == "Normal"]
+mean.tumor <- rowMeans(methLevel(tumor))
+mean.normal <- rowMeans(methLevel(normal))
+
+
+start_pos<-start(ranges(rowData(predictedMeth)))
+smooth_mC<-methLevel(predictedMeth)
+
+smooth_mC_table<-cbind(start_pos, smooth_mC)
+rownames(smooth_mC_table)<-smooth_mC_table[,1]
+
+postscript(paste(chr.list[i], ".Biseq.AA.smoothed.groups.ps", sep=""), paper="letter", horizontal=T)
+par(mfrow=c(1,1))
+plot(mean.tumor,
+     mean.normal,
+     col = "blue",
+     xlab = "Methylation in tumor",
+     ylab = "Methylation in normal")
+dev.off()
+save.image(file=paste(chr.list[i], ".RData", sep=""))
+cat("smooth done! ", date(), "\n")
+
+# group effect
+## To shorten the run time set mc.cores, if possible!
+betaResults <- betaRegression(formula = ~group,
+                              link = "probit",
+                              object = predictedMeth,
+                              type = "BR", mc.cores=4)
+
+head(betaResults)
+save.image(file=paste(chr.list[i], ".RData", sep=""))
+cat("group effect done! ", date(), "\n")
+
+# Test CpG clusters for dirential methylation
+## Both resampled groups should have the same number of
+## cancer and control samples:
+predictedMethNull <- predictedMeth[,c(1:2, 4:5)]
+colData(predictedMethNull)$group.null <- rep(c(1,2), 2)
+## To shorten the run time, please set mc.cores, if possible!
+betaResultsNull <- betaRegression(formula = ~group.null,
+                                  link = "probit",
+                                  object = predictedMethNull,
+                                  type="BR",  mc.cores=4)
+save.image(file=paste(chr.list[i], ".RData", sep=""))
+cat("cluster done! ", date(), "\n")
+
+
+vario <- makeVariogram(betaResultsNull)
+vario.sm <- smoothVariogram(vario, sill = 0.9)
+
+## auxiliary object to get the pValsList for the test
+## results of interest:
+vario.aux <- makeVariogram(betaResults, make.variogram=FALSE)
+vario.sm$pValsList <- vario.aux$pValsList
+head(vario.sm$pValsList[[1]])
+
+
+
+locCor <- estLocCor(vario.sm)
+# q=0.1
+clusters.rej <- testClusters(locCor,  FDR.cluster = 0.1
+clusters.rej$clusters.reject
+
+clusters.trimmed <- trimClusters(clusters.rej, FDR.loc = 0.1)
+head(clusters.trimmed)
+
+# find DMRs
+DMRs <- findDMRs(clusters.trimmed, max.dist = 100, diff.dir = TRUE)
+DMRs
+
+DMRs.table<-cbind(start(ranges(DMRs)), end(ranges(DMRs)),DMRs$median.meth.diff, DMRs$median.p)
+
+no.CG<-apply(DMRs.table, 1, function(x) length(pos[pos>=x[1] & pos<=x[2]])[1])
+
+DMRs.table<-cbind(start(ranges(DMRs)), end(ranges(DMRs)), no.CG, DMRs$median.meth.diff, DMRs$median.p)
+
+# pick the DMRs with >=2 CG sites, and with mean difference >=0.3 between groups.
+diff.index<-(1:dim(DMRs.table)[1])[abs(DMRs.table[,4])>=0.3 & DMRs.table[,3]>=2]
+DMRs.table.2<-DMRs.table[diff.index,]
+rowCols <- c("magenta", "blue")[as.numeric(colData(predictedMeth)$group)]
+save.image(file=paste(chr.list[i], ".RData", sep=""))
+
+# heatmap for DMRs
+library("gplots")
+postscript( paste(chr.list[i],".Biseq.DMRs.ps",sep=""), paper="letter", horizontal=T)
+par(mfrow=c(1,1))
+colors = c( seq(0, 0.5,length=100),seq(0.5,1,length=100))
+my_palette <- colorRampPalette(c("darkgreen", "red"))(n = 199)
+
+for (k in diff.index){
+  plot_CG<- smooth_mC_table[ smooth_mC_table[,1]>=DMRs.table[k,1] & smooth_mC_table[,1]<=DMRs.table[k,2],2:7]
+  if (dim(plot_CG)[1]<10){
+  heatmap.2(t(plot_CG), key.xlab="methylation level", offsetRow=0.5, offsetCol=2, srtCol=45, cellnote=signif(t(plot_CG),3),notecex=1.3, notecol="white",  adjCol=c(0.4,0.6), col=my_palette, breaks=colors, density.info="none", trace="none", dendrogram=c("row"), keysize=1, symm=F,symkey=F,symbreaks=F, scale="none", cexCol=1, cexRow=1.7,  RowSideColors=rowCols,Colv=NULL, Rowv=NULL, lmat=rbind( c(0,0,0,0,0), c(3,1,2,2,0), c(0,0,5,4,4),  c(0,0,0,0,0)), lhei=c(1,2.5,1,2.5), lwid=c(3,1, 12, 2,6))
+  }
+  else {
+  heatmap.2(t(plot_CG), key.xlab="methylation level", offsetRow=0.5, offsetCol=2, srtCol=45, cellnote=signif(t(plot_CG),3),notecex=0.8, notecol="white",  adjCol=c(0.4,0.6), col=my_palette, breaks=colors, density.info="none", trace="none", dendrogram=c("row"), keysize=1, symm=F,symkey=F,symbreaks=F, scale="none", cexCol=1, cexRow=1.7,  RowSideColors=rowCols,Colv=NULL, Rowv=NULL, lmat=rbind( c(0,0,0,0,0), c(3,1,2,2,0), c(0,0,5,4,4),  c(0,0,0,0,0)), lhei=c(1,2.5,1,2.5), lwid=c(3,1, 18, 1,2))
+
+  }
+}
+
+
+write.table(mC_mat_pos, paste(chr.list[i], ".mC.txt", sep="") ,quote=F, row.names=F)
+write.table(DMRs.table, paste(chr.list[i], ".DMRs.txt", sep=""), quote=F, row.names=F)
+write.table(smooth_mC_table, paste(chr.list[i], ".smooth.mC.txt", sep=""), quote=F, row.names=F)
+save.image(file=paste(chr.list[i], ".RData", sep=""))
+
+q()
