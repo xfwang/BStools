@@ -15,6 +15,9 @@ Note:
 2) the retrieving step is only appled when fixed trimming (-T) is chosen by users
 3) If users only want to trim off based at the 5' end (for NextSeq platform, the sequencing reads usually have low quality at the 5' end, but not 3' end), please specify -n as 0, such that no bases from 3' end will be trimmed off.
 
+Main Inout:
+1) example.fastq: the fastq sequencing reads 
+2) chr.list.name.txt: The chromosome list file shows the location of the reference genome for the chromosomes that users would like to analyze. See chr.list.name.txt for example. Please note that the location of chromosomes references should be corresponding to the reference directory which is specified in options "-d".
 
 Main output:	
 1) _fastqc.zip: FastQc results
