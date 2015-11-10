@@ -600,11 +600,11 @@ sub printUsage
   print " \t\t -- brat: brat dynamic trimming (default) \n";
   print " \t\t -- fix: fixed quality trimming \n";
   print " \t\t -- retrieve: fixed quality trimming + retrieve trimmed C sites \n";
-  print " [-q <int>]\t for brat trimming, specifies the threshold for quality score"
-  print " [-m <int>]\t for brat trimming, specifies the specifies the allowed number of Ns"  
+  print " [-q <int>]\t for brat trimming, specifies the threshold for quality score";
+  print " [-m <int>]\t for brat trimming, specifies the specifies the allowed number of Ns";  
   print " [-N <int>]\t for fixed quality trimming (the users specifies the number of bases to be trimmed at 5' end, default is 5) \n";
   print " [-n <int>]\t for fixed quality trimming (the users specifies the number of bases to be trimmed at 3' end, default is 10) \n";
-  print " [-H <int>]\t for brat alignment, specifies the threshold for mismatch"  
+  print " [-H <int>]\t for brat alignment, specifies the threshold for mismatch";  
   print " [-B <real>]\t cutoff value for high bisulfite rate (([0, 1], default is 0.99))\n";
   print " [-b <real>]\t cutoff value for low bisulfite rate (([0, 1], default is 0.6) \n";
   print " [-L <real>]\t cutoff value for high coverage (([0, 1], default is 0.5) \n";
