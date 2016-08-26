@@ -1,6 +1,12 @@
 # BStools
 README.txt for BStools
 
+**Citation:**
+
+Wang X, et al. A trimming-and-retrieving alignment scheme for bisulfite sequencing data. Bioinformatics (2015) 31(12):2040-2.
+
+
+
 1. Installation: All needed software are compliled in resource folder. The toolkit is ready to use once unzipped.
                  If users prefer to use the software (FastQc, brat, fastx, cutadapt) by themself, the path for these software can be specified in main function: RRBS.pl
 
